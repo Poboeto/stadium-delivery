@@ -1,1 +1,1595 @@
 
+
+
+
+
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <title>Table Menu • Order + Total</title>
+
+  <!-- Typography: warm, editorial restaurant vibe -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300,400,600,700&family=Inter:wght@300,400,500,600&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg: #fbf6ee;
+      --paper: #fffaf2;
+      --ink: #1b1a16;
+      --muted: rgba(27,26,22,.66);
+      --line: rgba(27,26,22,.14);
+
+      --accent: #b63a2b;     /* warm tomato */
+      --accent2: #2a6f62;    /* herb green */
+      --gold: #b98b2f;
+
+      --shadow: 0 24px 60px rgba(27,26,22,.10);
+      --shadow2: 0 10px 30px rgba(27,26,22,.08);
+
+      --radius-xl: 28px;
+      --radius-lg: 18px;
+      --radius-md: 14px;
+
+      --container: 1180px;
+
+      --step--1: clamp(.84rem, .82rem + .2vw, .92rem);
+      --step-0: clamp(1rem, .95rem + .3vw, 1.125rem);
+      --step-1: clamp(1.25rem, 1.05rem + .9vw, 1.6rem);
+      --step-2: clamp(1.55rem, 1.2rem + 1.6vw, 2.2rem);
+      --step-3: clamp(2.2rem, 1.5rem + 3.3vw, 3.3rem);
+      --step-4: clamp(2.8rem, 1.9rem + 4vw, 4.2rem);
+    }
+
+    *{ box-sizing: border-box; }
+    html, body { height: 100%; }
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 700px at 10% -10%, rgba(182,58,43,.10), transparent 55%),
+        radial-gradient(900px 600px at 95% 10%, rgba(42,111,98,.10), transparent 55%),
+        radial-gradient(800px 500px at 50% 100%, rgba(185,139,47,.10), transparent 55%),
+        linear-gradient(180deg, var(--bg), #fff);
+      overflow-x: hidden;
+    }
+
+    /* Subtle "printed menu" texture (no external images) */
+    body:before{
+      content:"";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        repeating-linear-gradient(
+          90deg,
+          rgba(27,26,22,.020) 0px,
+          rgba(27,26,22,.020) 1px,
+          transparent 1px,
+          transparent 9px
+        );
+      mix-blend-mode: multiply;
+      opacity: .45;
+    }
+
+    a{ color: inherit; text-decoration: none; }
+    button, input, select, textarea { font: inherit; }
+    ::selection{ background: rgba(182,58,43,.18); }
+
+    .container{
+      width: min(var(--container), calc(100% - 2.1rem));
+      margin: 0 auto;
+    }
+
+    /* Top bar */
+    header{
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(10px);
+      background: rgba(251,246,238,.78);
+      border-bottom: 1px solid var(--line);
+    }
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 1rem;
+      padding: .95rem 0;
+    }
+    .brand{
+      display:flex;
+      align-items:baseline;
+      gap:.7rem;
+      letter-spacing: .02em;
+    }
+    .brand .mark{
+      width: 14px; height: 14px;
+      border-radius: 4px;
+      background: conic-gradient(from 210deg, var(--accent), var(--gold), var(--accent2), var(--accent));
+      box-shadow: 0 10px 18px rgba(182,58,43,.18);
+      transform: rotate(10deg);
+    }
+    .brand .name{
+      font-family: Fraunces, serif;
+      font-weight: 650;
+      font-size: 1.1rem;
+    }
+    .brand .tag{
+      font-size: .85rem;
+      color: var(--muted);
+      border-left: 1px solid var(--line);
+      padding-left: .7rem;
+      margin-left: .1rem;
+      display:none;
+    }
+    @media (min-width: 720px){
+      .brand .tag{ display:inline; }
+    }
+
+    .statusPill{
+      display:flex;
+      align-items:center;
+      gap:.55rem;
+      padding: .55rem .8rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,250,242,.8);
+      box-shadow: 0 10px 24px rgba(27,26,22,.06);
+    }
+    .dot{
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent2);
+      box-shadow: 0 0 0 6px rgba(42,111,98,.12);
+    }
+    .statusText{
+      font-size: .92rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    /* Hero */
+    .hero{
+      padding: 2.2rem 0 1.6rem;
+    }
+    .heroGrid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 1.3rem;
+      align-items: start;
+    }
+    @media (min-width: 980px){
+      .heroGrid{
+        grid-template-columns: 1.2fr .8fr;
+        gap: 2rem;
+      }
+    }
+
+    .heroTitle{
+      font-family: Fraunces, serif;
+      font-weight: 650;
+      font-size: var(--step-4);
+      line-height: 1.02;
+      letter-spacing: -0.02em;
+      margin: 0;
+    }
+    .heroTitle .swash{
+      background: linear-gradient(90deg, rgba(182,58,43,.18), rgba(185,139,47,.18), rgba(42,111,98,.18));
+      padding: .02em .18em;
+      border-radius: .35em;
+      box-decoration-break: clone;
+    }
+    .heroLead{
+      margin: .9rem 0 0;
+      font-size: var(--step-1);
+      color: var(--muted);
+      line-height: 1.5;
+      max-width: 60ch;
+    }
+
+    .heroPanel{
+      border-radius: var(--radius-xl);
+      background:
+        radial-gradient(900px 400px at 10% 0%, rgba(182,58,43,.11), transparent 55%),
+        radial-gradient(700px 420px at 100% 20%, rgba(42,111,98,.10), transparent 55%),
+        linear-gradient(180deg, rgba(255,250,242,.95), rgba(255,255,255,.85));
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+    }
+    .heroPanel:before{
+      content:"";
+      position:absolute;
+      inset: -2px;
+      background:
+        radial-gradient(12px 12px at 20px 22px, rgba(27,26,22,.12), transparent 60%),
+        radial-gradient(12px 12px at 90% 40px, rgba(27,26,22,.10), transparent 60%),
+        radial-gradient(14px 14px at 60% 90%, rgba(27,26,22,.10), transparent 60%);
+      opacity: .55;
+      pointer-events:none;
+    }
+    .panelInner{
+      position: relative;
+      padding: 1.2rem 1.2rem 1rem;
+      display:grid;
+      gap: .8rem;
+    }
+    .panelTitle{
+      display:flex;
+      align-items:baseline;
+      justify-content: space-between;
+      gap: 1rem;
+      border-bottom: 1px dashed rgba(27,26,22,.22);
+      padding-bottom: .75rem;
+    }
+    .panelTitle h2{
+      margin:0;
+      font-family: Fraunces, serif;
+      letter-spacing: -0.01em;
+      font-size: var(--step-2);
+      font-weight: 650;
+    }
+    .panelTitle .meta{
+      color: var(--muted);
+      font-size: .95rem;
+      text-align:right;
+      min-width: 12ch;
+    }
+
+    .tableRow{
+      display:flex;
+      gap: .7rem;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .field{
+      display:flex;
+      align-items:center;
+      gap:.55rem;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.6);
+      border-radius: 999px;
+      padding: .55rem .7rem;
+      box-shadow: 0 10px 24px rgba(27,26,22,.05);
+      flex: 1 1 240px;
+    }
+    .field label{
+      font-size: .85rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .field input{
+      border: 0;
+      outline: none;
+      background: transparent;
+      width: 100%;
+      font-weight: 550;
+      color: var(--ink);
+    }
+    .field input::placeholder{ color: rgba(27,26,22,.35); }
+
+    .ctaRow{
+      display:flex;
+      gap: .7rem;
+      align-items:center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      padding-top: .2rem;
+    }
+
+    .primaryBtn{
+      appearance: none;
+      border: 1px solid rgba(182,58,43,.35);
+      background: linear-gradient(180deg, rgba(182,58,43,.98), rgba(150,39,28,.98));
+      color: #fff;
+      border-radius: 999px;
+      padding: .82rem 1.05rem;
+      font-weight: 650;
+      letter-spacing: .01em;
+      box-shadow: 0 18px 40px rgba(182,58,43,.22);
+      display:inline-flex;
+      align-items:center;
+      gap:.6rem;
+      cursor:pointer;
+      transform: translateY(0);
+      transition: transform .15s ease, box-shadow .2s ease, filter .2s ease;
+      flex: 1 1 240px;
+      justify-content:center;
+    }
+    .primaryBtn:hover{ transform: translateY(-1px); filter: brightness(1.02); }
+    .primaryBtn:active{ transform: translateY(0px) scale(.99); box-shadow: 0 12px 26px rgba(182,58,43,.18); }
+    .primaryBtn[disabled]{ opacity: .55; cursor: not-allowed; filter: grayscale(.1); transform:none; }
+
+    .ghostBtn{
+      appearance: none;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.55);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: .82rem 1.05rem;
+      font-weight: 600;
+      letter-spacing: .01em;
+      box-shadow: 0 14px 30px rgba(27,26,22,.07);
+      display:inline-flex;
+      align-items:center;
+      gap:.6rem;
+      cursor:pointer;
+      transition: transform .15s ease, background .2s ease;
+      flex: 0 0 auto;
+      justify-content:center;
+    }
+    .ghostBtn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.72); }
+    .ghostBtn:active{ transform: translateY(0) scale(.99); }
+
+    .kbd{
+      font-size: .78rem;
+      padding: .12rem .4rem;
+      border-radius: .5rem;
+      border: 1px solid rgba(27,26,22,.18);
+      background: rgba(255,255,255,.6);
+      color: rgba(27,26,22,.7);
+    }
+
+    /* Layout: menu + ticket (no generic card grid; menu is a structured list) */
+    main{
+      padding: .6rem 0 4rem;
+    }
+    .layout{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 1.2rem;
+      align-items:start;
+    }
+    @media (min-width: 980px){
+      .layout{
+        grid-template-columns: 1.2fr .8fr;
+        gap: 1.6rem;
+      }
+    }
+
+    .menuSection{
+      border-radius: var(--radius-xl);
+      background: rgba(255,250,242,.8);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow2);
+      overflow: clip;
+      position: relative;
+    }
+    .menuHead{
+      padding: 1.1rem 1.2rem .9rem;
+      display:flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 1rem;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.70), rgba(255,255,255,.0));
+      border-bottom: 1px solid rgba(27,26,22,.10);
+    }
+    .menuHead h3{
+      margin:0;
+      font-family: Fraunces, serif;
+      font-weight: 650;
+      letter-spacing: -0.01em;
+      font-size: var(--step-2);
+      line-height:1.1;
+    }
+    .menuHead p{
+      margin:.35rem 0 0;
+      color: var(--muted);
+      font-size: .95rem;
+      max-width: 56ch;
+    }
+
+    .filters{
+      display:flex;
+      gap:.55rem;
+      align-items:center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .chip{
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.58);
+      border-radius: 999px;
+      padding: .45rem .7rem;
+      font-weight: 600;
+      font-size: .9rem;
+      color: rgba(27,26,22,.78);
+      cursor:pointer;
+      transition: transform .15s ease, background .2s ease, border-color .2s ease;
+      user-select:none;
+    }
+    .chip:hover{ transform: translateY(-1px); background: rgba(255,255,255,.76); }
+    .chip[aria-pressed="true"]{
+      border-color: rgba(182,58,43,.35);
+      background: rgba(182,58,43,.10);
+      color: rgba(27,26,22,.9);
+    }
+
+    .menuBody{
+      padding: 1rem 1.2rem 1.2rem;
+    }
+
+    .category{
+      padding: .8rem 0 .3rem;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: .7rem;
+    }
+    .categoryTitle{
+      display:flex;
+      align-items:baseline;
+      justify-content: space-between;
+      gap: 1rem;
+      padding-bottom: .4rem;
+      border-bottom: 1px dashed rgba(27,26,22,.22);
+    }
+    .categoryTitle h4{
+      margin:0;
+      font-family: Fraunces, serif;
+      font-weight: 650;
+      font-size: var(--step-1);
+      letter-spacing: -0.01em;
+    }
+    .categoryTitle span{
+      color: var(--muted);
+      font-size: .92rem;
+    }
+
+    .item{
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap: .9rem;
+      padding: .8rem 0;
+      border-bottom: 1px solid rgba(27,26,22,.08);
+    }
+    .item:last-child{ border-bottom: 0; }
+    .itemMain{
+      display:grid;
+      gap: .35rem;
+      align-content:start;
+    }
+    .itemNameRow{
+      display:flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .itemName{
+      font-weight: 650;
+      letter-spacing: .01em;
+    }
+    .itemPrice{
+      font-variant-numeric: tabular-nums;
+      color: rgba(27,26,22,.80);
+      font-weight: 650;
+      white-space: nowrap;
+    }
+    .itemDesc{
+      color: var(--muted);
+      font-size: var(--step--1);
+      line-height: 1.45;
+      max-width: 70ch;
+    }
+
+    .itemControls{
+      display:flex;
+      flex-direction: column;
+      gap: .55rem;
+      align-items: flex-end;
+      justify-content: center;
+      min-width: 152px;
+    }
+    .qty{
+      display:inline-flex;
+      align-items:center;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.6);
+      border-radius: 999px;
+      box-shadow: 0 10px 20px rgba(27,26,22,.06);
+      overflow:hidden;
+    }
+    .qty button{
+      width: 38px;
+      height: 38px;
+      border: 0;
+      background: transparent;
+      cursor:pointer;
+      color: rgba(27,26,22,.75);
+      transition: background .2s ease, transform .15s ease;
+    }
+    .qty button:hover{ background: rgba(27,26,22,.06); }
+    .qty button:active{ transform: scale(.98); }
+    .qty output{
+      min-width: 44px;
+      text-align:center;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      padding: 0 .15rem;
+      color: rgba(27,26,22,.88);
+    }
+
+    .noteBtn{
+      border: 1px solid rgba(27,26,22,.14);
+      background: rgba(255,255,255,.55);
+      color: rgba(27,26,22,.78);
+      border-radius: 999px;
+      padding: .42rem .65rem;
+      font-size: .88rem;
+      font-weight: 600;
+      cursor:pointer;
+      transition: transform .15s ease, background .2s ease;
+      display:inline-flex;
+      align-items:center;
+      gap:.45rem;
+    }
+    .noteBtn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.72); }
+    .noteBtn:active{ transform: translateY(0) scale(.99); }
+
+    /* Ticket (order summary) */
+    aside{
+      position: relative;
+    }
+    .ticket{
+      border-radius: var(--radius-xl);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,250,242,.78));
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .ticketHead{
+      padding: 1.1rem 1.2rem .9rem;
+      display:flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 1rem;
+      border-bottom: 1px solid rgba(27,26,22,.10);
+      background:
+        radial-gradient(900px 300px at 0% 0%, rgba(42,111,98,.11), transparent 55%),
+        radial-gradient(800px 300px at 100% 0%, rgba(182,58,43,.10), transparent 55%);
+    }
+    .ticketHead h3{
+      margin:0;
+      font-family: Fraunces, serif;
+      font-weight: 650;
+      font-size: var(--step-2);
+      letter-spacing: -0.01em;
+    }
+    .ticketHead .small{
+      color: var(--muted);
+      font-size: .92rem;
+      text-align:right;
+      line-height: 1.2;
+    }
+
+    .ticketBody{
+      padding: 1rem 1.2rem 1.2rem;
+      display:grid;
+      gap: 1rem;
+    }
+
+    .lineItems{
+      display:grid;
+      gap: .65rem;
+      padding-bottom: .9rem;
+      border-bottom: 1px dashed rgba(27,26,22,.22);
+      min-height: 64px;
+    }
+    .emptyState{
+      color: var(--muted);
+      font-size: .95rem;
+      line-height: 1.4;
+    }
+    .li{
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap: .8rem;
+      align-items:start;
+    }
+    .liTitle{
+      display:flex;
+      gap:.55rem;
+      align-items: baseline;
+      flex-wrap: wrap;
+    }
+    .liTitle strong{ font-weight: 700; }
+    .liTitle .qtyTag{
+      font-variant-numeric: tabular-nums;
+      font-weight: 750;
+      color: rgba(27,26,22,.8);
+      border: 1px solid rgba(27,26,22,.14);
+      background: rgba(255,255,255,.55);
+      border-radius: 999px;
+      padding: .1rem .45rem;
+      font-size: .85rem;
+    }
+    .liNote{
+      color: var(--muted);
+      font-size: .9rem;
+      margin-top: .15rem;
+      padding-left: .1rem;
+    }
+    .liPrice{
+      font-variant-numeric: tabular-nums;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .totals{
+      display:grid;
+      gap: .45rem;
+    }
+    .row{
+      display:flex;
+      justify-content: space-between;
+      gap: 1rem;
+      color: rgba(27,26,22,.78);
+      font-variant-numeric: tabular-nums;
+      font-size: .98rem;
+    }
+    .row strong{ color: rgba(27,26,22,.92); }
+    .grand{
+      margin-top: .2rem;
+      padding-top: .7rem;
+      border-top: 1px solid rgba(27,26,22,.10);
+      display:flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 1rem;
+    }
+    .grand .label{
+      font-family: Fraunces, serif;
+      font-weight: 650;
+      letter-spacing: -0.01em;
+      font-size: 1.15rem;
+    }
+    .grand .value{
+      font-family: Fraunces, serif;
+      font-weight: 700;
+      font-size: 1.45rem;
+      letter-spacing: -0.01em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .ticketActions{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: .65rem;
+      padding-top: .35rem;
+    }
+
+    .subActions{
+      display:flex;
+      gap: .65rem;
+      flex-wrap: wrap;
+      align-items:center;
+      justify-content: space-between;
+    }
+
+    .mini{
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.55);
+      border-radius: 999px;
+      padding: .7rem .9rem;
+      font-weight: 650;
+      cursor:pointer;
+      transition: transform .15s ease, background .2s ease;
+      flex: 1 1 180px;
+      text-align:center;
+    }
+    .mini:hover{ transform: translateY(-1px); background: rgba(255,255,255,.74); }
+    .mini:active{ transform: translateY(0) scale(.99); }
+    .mini.danger{
+      border-color: rgba(182,58,43,.28);
+      color: rgba(182,58,43,.96);
+      background: rgba(182,58,43,.07);
+    }
+
+    .srOnly{
+      position:absolute;
+      width:1px; height:1px;
+      padding:0; margin:-1px;
+      overflow:hidden; clip:rect(0,0,0,0);
+      border:0;
+    }
+
+    /* Modal */
+    dialog{
+      border: 0;
+      padding: 0;
+      border-radius: 22px;
+      width: min(720px, calc(100% - 2rem));
+      box-shadow: 0 40px 120px rgba(27,26,22,.24);
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(12px);
+    }
+    dialog::backdrop{
+      background: rgba(27,26,22,.45);
+      backdrop-filter: blur(3px);
+    }
+    .modal{
+      padding: 1.05rem 1.1rem 1rem;
+      display:grid;
+      gap: .85rem;
+    }
+    .modalHead{
+      display:flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 1rem;
+      border-bottom: 1px solid rgba(27,26,22,.10);
+      padding-bottom: .75rem;
+    }
+    .modalHead h4{
+      margin:0;
+      font-family: Fraunces, serif;
+      font-weight: 650;
+      letter-spacing: -0.01em;
+      font-size: 1.35rem;
+    }
+    .modalHead p{
+      margin:.25rem 0 0;
+      color: var(--muted);
+      font-size: .95rem;
+      line-height: 1.35;
+    }
+    .closeX{
+      border: 1px solid rgba(27,26,22,.14);
+      background: rgba(255,255,255,.6);
+      border-radius: 999px;
+      width: 40px; height: 40px;
+      cursor:pointer;
+      transition: transform .15s ease, background .2s ease;
+    }
+    .closeX:hover{ transform: translateY(-1px); background: rgba(255,255,255,.78); }
+    .closeX:active{ transform: translateY(0) scale(.99); }
+
+    .modalGrid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: .8rem;
+    }
+    @media (min-width: 720px){
+      .modalGrid{ grid-template-columns: 1.1fr .9fr; gap: 1rem; }
+    }
+    textarea{
+      width:100%;
+      min-height: 132px;
+      resize: vertical;
+      border-radius: 16px;
+      border: 1px solid rgba(27,26,22,.14);
+      background: rgba(255,255,255,.65);
+      padding: .85rem .9rem;
+      outline: none;
+      line-height: 1.35;
+    }
+    textarea:focus{
+      border-color: rgba(182,58,43,.35);
+      box-shadow: 0 0 0 6px rgba(182,58,43,.10);
+    }
+
+    .modalSide{
+      border-radius: 18px;
+      border: 1px solid rgba(27,26,22,.10);
+      background: linear-gradient(180deg, rgba(182,58,43,.06), rgba(42,111,98,.05));
+      padding: .85rem .9rem;
+      display:grid;
+      gap: .6rem;
+      align-content:start;
+    }
+    .modalSide .k{
+      font-size: .85rem;
+      color: var(--muted);
+    }
+    .modalSide .v{
+      font-weight: 750;
+      font-variant-numeric: tabular-nums;
+    }
+    .modalActions{
+      display:flex;
+      gap: .65rem;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      padding-top: .1rem;
+    }
+
+    /* Motion: reveal */
+    .reveal{
+      opacity: 0;
+      transform: translateY(12px);
+      animation: rise .72s cubic-bezier(.2,.8,.2,1) forwards;
+    }
+    @keyframes rise{
+      to{ opacity: 1; transform: translateY(0); }
+    }
+    .delay-1{ animation-delay: .05s; }
+    .delay-2{ animation-delay: .12s; }
+    .delay-3{ animation-delay: .20s; }
+    .delay-4{ animation-delay: .28s; }
+
+    /* Toast */
+    .toastWrap{
+      position: fixed;
+      right: 1rem;
+      bottom: 1rem;
+      z-index: 40;
+      display:grid;
+      gap: .6rem;
+      pointer-events:none;
+    }
+    .toast{
+      pointer-events:auto;
+      width: min(420px, calc(100vw - 2rem));
+      border-radius: 18px;
+      border: 1px solid rgba(27,26,22,.14);
+      background: rgba(255,255,255,.82);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 22px 70px rgba(27,26,22,.18);
+      padding: .8rem .9rem;
+      display:flex;
+      align-items:flex-start;
+      justify-content: space-between;
+      gap: .8rem;
+      opacity: 0;
+      transform: translateY(8px);
+      animation: toastIn .32s ease forwards;
+    }
+    @keyframes toastIn{
+      to{ opacity:1; transform: translateY(0); }
+    }
+    .toast .title{
+      font-weight: 750;
+      letter-spacing: .01em;
+    }
+    .toast .msg{
+      margin-top: .15rem;
+      color: var(--muted);
+      font-size: .92rem;
+      line-height: 1.35;
+    }
+    .toast .dismiss{
+      border: 1px solid rgba(27,26,22,.14);
+      background: rgba(255,255,255,.6);
+      border-radius: 999px;
+      padding: .35rem .55rem;
+      cursor:pointer;
+      font-weight: 650;
+    }
+
+    footer{
+      padding: 2.4rem 0 3rem;
+      color: rgba(27,26,22,.62);
+      font-size: .95rem;
+    }
+    footer .foot{
+      border-top: 1px solid var(--line);
+      padding-top: 1.1rem;
+      display:flex;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .mono{
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: "tnum" 1;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="container">
+      <div class="topbar">
+        <div class="brand" aria-label="Restaurant brand">
+          <span class="mark" aria-hidden="true"></span>
+          <span class="name">Pirate consessions</span>
+          <span class="tag">Table ordering • totals + kitchen ticket</span>
+        </div>
+
+        <div class="statusPill" aria-live="polite" aria-label="Connection status">
+          <span class="dot" id="connDot" aria-hidden="true"></span>
+          <span class="statusText" id="connText">Kitchen link: <strong>Ready</strong></span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <div class="heroGrid">
+        <div class="reveal delay-1">
+          
+          
+        </div>
+
+        <div class="heroPanel reveal delay-2" aria-label="Order controls">
+          <div class="panelInner">
+            <div class="panelTitle">
+              <div>
+                <h2>Order details</h2>
+                <div class="meta mono" id="orderMeta">Draft • #—</div>
+              </div>
+              <div class="meta">
+                <div class="mono" id="nowStamp"></div>
+                <div style="margin-top:.2rem;">Tap items to add</div>
+              </div>
+            </div>
+
+            <div class="tableRow">
+              <div class="field">
+                <label for="tableInput">Seat</label>
+                <input id="tableInput" inputmode="numeric" placeholder="e.g., east 31" value="east 31" aria-describedby="tableHelp"/>
+                <span class="srOnly" id="tableHelp">Enter the seat number</span>
+              </div>
+
+              <div class="field">
+                <label for="guestInput">Guests</label>
+                <input id="guestInput" inputmode="numeric" placeholder="e.g., 2" value="2" aria-describedby="guestHelp"/>
+                <span class="srOnly" id="guestHelp">Enter number of guests</span>
+              </div>
+            </div>
+
+            <div class="ctaRow">
+              <button class="primaryBtn" id="submitBtn" disabled>
+                <span aria-hidden="true">Send to kitchen</span>
+                <span class="kbd" aria-hidden="true">Ctrl ↵</span>
+              </button>
+              <button class="ghostBtn" id="viewPayloadBtn" type="button">
+                View payload
+              </button>
+            </div>
+
+            <div class="mono" style="color:rgba(27,26,22,.62); font-size:.9rem; line-height:1.35;">
+              Tip: open DevTools Console to see the "POST /kitchen/orders" example.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main>
+    <div class="container">
+      <div class="layout">
+        <!-- MENU -->
+        <section class="menuSection reveal delay-2" aria-label="Menu">
+          <div class="menuHead">
+            <div>
+              <h3>Today's menu</h3>
+              <p>Balanced, warm flavors—built to be fast for staff and clear for the kitchen.</p>
+            </div>
+            <div class="filters" aria-label="Menu filters">
+              <button class="chip" data-filter="all" aria-pressed="true" type="button">All</button>
+              <button class="chip" data-filter="veg" aria-pressed="false" type="button">Vegetarian</button>
+              <button class="chip" data-filter="spicy" aria-pressed="false" type="button">Spicy</button>
+              <button class="chip" data-filter="glutenfree" aria-pressed="false" type="button">Gluten-free</button>
+            </div>
+          </div>
+
+          <div class="menuBody" id="menuRoot">
+            <!-- Injected by JS -->
+          </div>
+        </section>
+
+        <!-- TICKET -->
+        <aside class="reveal delay-3" aria-label="Order summary">
+          <section class="ticket">
+            <div class="ticketHead">
+              <div>
+                <h3>Your ticket</h3>
+                <div class="small">Readable for guests,<br/>structured for cooks.</div>
+              </div>
+              <div class="small mono" id="ticketStamp"></div>
+            </div>
+
+            <div class="ticketBody">
+              <div class="lineItems" id="lineItems" aria-live="polite">
+                <div class="emptyState" id="emptyState">
+                  Nothing selected yet. Add items from the menu to see totals and generate a kitchen ticket.
+                </div>
+              </div>
+
+              <div class="totals" aria-label="Totals">
+                <div class="row"><span>Subtotal</span><strong class="mono" id="subtotal">$0.00</strong></div>
+                <div class="row"><span>Tax (8.5%)</span><strong class="mono" id="tax">$0.00</strong></div>
+                <div class="row"><span>Service (optional)</span><strong class="mono" id="service">$0.00</strong></div>
+
+                <div class="grand">
+                  <div class="label">Total</div>
+                  <div class="value mono" id="total">$0.00</div>
+                </div>
+              </div>
+
+              <div class="ticketActions" aria-label="Ticket actions">
+                <label class="field" style="flex:1; box-shadow:none;">
+                  <span style="font-size:.85rem; color:var(--muted); white-space:nowrap;">Service %</span>
+                  <input id="servicePct" inputmode="decimal" placeholder="e.g., 0 or 10" value="0" aria-label="Service percentage"/>
+                </label>
+
+                <div class="subActions">
+                  <button class="mini" id="printBtn" type="button">Print ticket</button>
+                  <button class="mini danger" id="clearBtn" type="button">Clear</button>
+                </div>
+              </div>
+
+              <div class="mono" style="color:rgba(27,26,22,.62); font-size:.9rem; line-height:1.35;">
+                Kitchen payload includes: items, quantities, notes, table, guests, timestamps, totals.
+              </div>
+            </div>
+          </section>
+        </aside>
+      </div>
+
+      <footer>
+        <div class="foot">
+          <div>Demo UI • Replace the mock "send" with your own API endpoint.</div>
+          <div class="mono">Keyboard: <span class="kbd">Ctrl</span> + <span class="kbd">Enter</span> to send</div>
+        </div>
+      </footer>
+    </div>
+  </main>
+
+  <!-- Note modal -->
+  <dialog id="noteDialog" aria-label="Add kitchen note">
+    <form method="dialog" class="modal" id="noteForm">
+      <div class="modalHead">
+        <div>
+          <h4 id="noteTitle">Kitchen note</h4>
+          <p id="noteSub">Add a prep note for the kitchen (allergies, doneness, substitutions).</p>
+        </div>
+        <button class="closeX" type="button" id="closeNote" aria-label="Close dialog">✕</button>
+      </div>
+
+      <div class="modalGrid">
+        <div>
+          <label class="srOnly" for="noteText">Note</label>
+          <textarea id="noteText" placeholder="Example: No garlic. Sauce on the side. Medium rare."></textarea>
+        </div>
+        <div class="modalSide" aria-label="Item context">
+          <div><div class="k">Item</div><div class="v" id="noteItemName">—</div></div>
+          <div><div class="k">Qty</div><div class="v mono" id="noteItemQty">0</div></div>
+          <div><div class="k">Category</div><div class="v" id="noteItemCat">—</div></div>
+          <div style="padding-top:.2rem; color:var(--muted); font-size:.9rem; line-height:1.35;">
+            Notes are sent to the kitchen as part of the item line.
+          </div>
+        </div>
+      </div>
+
+      <div class="modalActions">
+        <button class="ghostBtn" type="button" id="cancelNote">Cancel</button>
+        <button class="primaryBtn" type="submit" id="saveNoteBtn">Save note</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Payload modal -->
+  <dialog id="payloadDialog" aria-label="Kitchen payload preview">
+    <div class="modal">
+      <div class="modalHead">
+        <div>
+          <h4>Kitchen payload (JSON)</h4>
+          <p>What you would <strong>POST</strong> to your kitchen system or POS backend.</p>
+        </div>
+        <button class="closeX" type="button" id="closePayload" aria-label="Close dialog">✕</button>
+      </div>
+
+      <pre id="payloadPre" style="
+        margin:0;
+        padding: .9rem;
+        border-radius: 16px;
+        border: 1px solid rgba(27,26,22,.14);
+        background: rgba(255,255,255,.65);
+        overflow:auto;
+        max-height: 52vh;
+        font-size: .92rem;
+        line-height: 1.35;
+      "></pre>
+
+      <div class="modalActions">
+        <button class="mini" id="copyPayload" type="button">Copy JSON</button>
+        <button class="primaryBtn" id="closePayload2" type="button">Done</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="toastWrap" id="toastWrap" aria-live="polite" aria-relevant="additions"></div>
+
+  <script>
+    // ---------- Menu data ----------
+    const MENU = [
+      {
+        category: "Small plates",
+        hint: "Great to share",
+        items: [
+          { id:"sm-olive", name:"chicken", desc:"DFdadsfa", price: 6.5, tags:["veg","glutenfree"] },
+          { id:"sm-hummus", name:"Smoked Pepper Hummus", desc:"Charred peppers, tahini, lemon. Flatbread on the side.", price: 8.0, tags:["veg"], mods:["No garlic","Extra lemon","Add chili oil"] },
+          { id:"sm-soup", name:"Market Soup", desc:"Seasonal vegetables, herb broth.", price: 7.0, tags:["veg","glutenfree"] }
+        ]
+      },
+      {
+        category: "Mains",
+        hint: "House favorites",
+        items: [
+          { id:"mn-chicken", name:"Harissa Roast Chicken", desc:"Crisp skin, labneh, pickled shallots.", price: 19.0, tags:["spicy","glutenfree"], mods:["Mild","Extra spicy","Sauce on side"] },
+          { id:"mn-lamb", name:"Braised Lamb & Apricot", desc:"Saffron rice, toasted almonds.", price: 24.5, tags:["glutenfree"], mods:["No nuts"] },
+          { id:"mn-caul", name:"Cauliflower Steak", desc:"Herb salsa verde, toasted seeds, lemon.", price: 18.0, tags:["veg","glutenfree"], mods:["No seeds"] }
+        ]
+      },
+      {
+        category: "Dessert",
+        hint: "Finish strong",
+        items: [
+          { id:"ds-cake", name:"Olive Oil Cake", desc:"Citrus glaze, pistachio crumble.", price: 8.5, tags:["veg"], mods:["No nuts"] },
+          { id:"ds-sorbet", name:"Pomegranate Sorbet", desc:"Bright, cold, clean finish.", price: 7.0, tags:["veg","glutenfree"] }
+        ]
+      },
+      {
+        category: "Drinks",
+        hint: "Zero-proof + classics",
+        items: [
+          { id:"dr-spritz", name:"Cucumber Lime Spritz", desc:"Sparkling, fresh, mint.", price: 6.0, tags:["veg","glutenfree"] },
+          { id:"dr-tea", name:"Black Tea • Hot", desc:"Bergamot, honey optional.", price: 4.0, tags:["veg","glutenfree"] }
+        ]
+      }
+    ];
+
+    // ---------- State ----------
+    const state = {
+      orderId: null,
+      createdAt: new Date(),
+      table: "12",
+      guests: "2",
+      servicePct: 0,
+      filter: "all",
+      cart: new Map(), // id -> {id,name,price,qty,category,tags,note}
+      taxRate: 0.085
+    };
+
+    // ---------- Utilities ----------
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+    const money = (n) => new Intl.NumberFormat(undefined, { style:"currency", currency:"USD" }).format(n);
+    const uid = () => Math.random().toString(16).slice(2, 10).toUpperCase();
+    const clampNum = (v, min, max) => Math.max(min, Math.min(max, v));
+
+    function nowStamp(){
+      const d = new Date();
+      return d.toLocaleString(undefined, { weekday:"short", hour:"2-digit", minute:"2-digit" });
+    }
+
+    function computeTotals(){
+      let subtotal = 0;
+      for (const line of state.cart.values()){
+        subtotal += line.price * line.qty;
+      }
+      const tax = subtotal * state.taxRate;
+      const service = subtotal * (state.servicePct / 100);
+      const total = subtotal + tax + service;
+      return { subtotal, tax, service, total };
+    }
+
+    function cartCount(){
+      let c = 0;
+      for (const line of state.cart.values()) c += line.qty;
+      return c;
+    }
+
+    // ---------- Render menu ----------
+    function renderMenu(){
+      const root = $("#menuRoot");
+      root.innerHTML = "";
+
+      const filter = state.filter;
+      const matches = (item) => filter === "all" ? true : item.tags?.includes(filter);
+
+      for (const cat of MENU){
+        const visibleItems = cat.items.filter(matches);
+        if (!visibleItems.length) continue;
+
+        const section = document.createElement("section");
+        section.className = "category";
+        section.setAttribute("aria-label", cat.category);
+
+        const head = document.createElement("div");
+        head.className = "categoryTitle";
+        head.innerHTML = `<h4>${cat.category}</h4><span>${cat.hint}</span>`;
+        section.appendChild(head);
+
+        for (const item of visibleItems){
+          const line = state.cart.get(item.id);
+          const qty = line?.qty ?? 0;
+
+          const row = document.createElement("article");
+          row.className = "item";
+          row.dataset.itemId = item.id;
+          row.dataset.tags = (item.tags || []).join(",");
+          row.innerHTML = `
+            <div class="itemMain">
+              <div class="itemNameRow">
+                <div class="itemName">${item.name}</div>
+                <div class="itemPrice mono">${money(item.price)}</div>
+              </div>
+              <div class="itemDesc">${item.desc}</div>
+            </div>
+            <div class="itemControls">
+              <div class="qty" role="group" aria-label="Quantity controls for ${item.name}">
+                <button type="button" class="dec" aria-label="Decrease ${item.name}">−</button>
+                <output class="mono" aria-live="polite">${qty}</output>
+                <button type="button" class="inc" aria-label="Increase ${item.name}">+</button>
+              </div>
+              <button type="button" class="noteBtn" aria-label="Add note to ${item.name}">
+                Note <span class="mono" style="opacity:.65;">⟶</span>
+              </button>
+            </div>
+          `;
+          section.appendChild(row);
+        }
+
+        root.appendChild(section);
+      }
+    }
+
+    // ---------- Render ticket ----------
+    function renderTicket(){
+      const wrap = $("#lineItems");
+      const empty = $("#emptyState");
+      wrap.innerHTML = "";
+      const lines = Array.from(state.cart.values()).filter(l => l.qty > 0);
+
+      if (!lines.length){
+        wrap.appendChild(empty);
+        empty.style.display = "block";
+      } else {
+        empty.style.display = "none";
+        for (const l of lines){
+          const el = document.createElement("div");
+          el.className = "li";
+          el.innerHTML = `
+            <div>
+              <div class="liTitle">
+                <span class="qtyTag mono">×${l.qty}</span>
+                <strong>${l.name}</strong>
+              </div>
+              ${l.note ? `<div class="liNote">"${escapeHtml(l.note)}"</div>` : ``}
+            </div>
+            <div class="liPrice mono">${money(l.price * l.qty)}</div>
+          `;
+          wrap.appendChild(el);
+        }
+      }
+
+      const { subtotal, tax, service, total } = computeTotals();
+      $("#subtotal").textContent = money(subtotal);
+      $("#tax").textContent = money(tax);
+      $("#service").textContent = money(service);
+      $("#total").textContent = money(total);
+
+      $("#submitBtn").disabled = cartCount() === 0 || !String(state.table).trim();
+
+      // Meta
+      $("#ticketStamp").textContent = `Updated • ${nowStamp()}`;
+      $("#orderMeta").textContent = `${cartCount() ? "Ready" : "Draft"} • #${state.orderId ?? "—"}`;
+    }
+
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    // ---------- Cart operations ----------
+    function ensureLine(item){
+      if (!state.cart.has(item.id)){
+        state.cart.set(item.id, {
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          qty: 0,
+          category: findCategory(item.id),
+          tags: item.tags || [],
+          note: ""
+        });
+      }
+      return state.cart.get(item.id);
+    }
+
+    function findItem(id){
+      for (const cat of MENU){
+        const it = cat.items.find(x => x.id === id);
+        if (it) return it;
+      }
+      return null;
+    }
+
+    function findCategory(id){
+      for (const cat of MENU){
+        if (cat.items.some(x => x.id === id)) return cat.category;
+      }
+      return "—";
+    }
+
+    function setQty(id, nextQty){
+      const item = findItem(id);
+      if (!item) return;
+      const line = ensureLine(item);
+      line.qty = clampNum(nextQty, 0, 99);
+      if (line.qty === 0 && !line.note) state.cart.delete(id);
+      renderMenu();   // keep menu quantities in sync
+      renderTicket();
+    }
+
+    // ---------- Notes modal ----------
+    const noteDialog = $("#noteDialog");
+    let activeNoteItemId = null;
+
+    function openNote(id){
+      const item = findItem(id);
+      if (!item) return;
+      activeNoteItemId = id;
+
+      const line = state.cart.get(id) || ensureLine(item);
+
+      $("#noteItemName").textContent = item.name;
+      $("#noteItemQty").textContent = String(line.qty);
+      $("#noteItemCat").textContent = findCategory(id);
+      $("#noteTitle").textContent = `Kitchen note`;
+      $("#noteText").value = line.note || "";
+
+      if (typeof noteDialog.showModal === "function") noteDialog.showModal();
+      else {
+        toast("Unsupported", "Your browser doesn't support <dialog>. Notes are still stored, but the modal can't open.");
+      }
+      $("#noteText").focus();
+    }
+
+    function closeNote(){
+      activeNoteItemId = null;
+      if (noteDialog.open) noteDialog.close();
+    }
+
+    $("#closeNote").addEventListener("click", closeNote);
+    $("#cancelNote").addEventListener("click", closeNote);
+
+    $("#noteForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (!activeNoteItemId) return closeNote();
+
+      const item = findItem(activeNoteItemId);
+      if (!item) return closeNote();
+
+      const line = ensureLine(item);
+      line.note = $("#noteText").value.trim();
+
+      // if they added a note but qty is 0, gently set qty to 1 (common UX pattern)
+      if (line.note && line.qty === 0) line.qty = 1;
+
+      if (line.qty === 0 && !line.note) state.cart.delete(activeNoteItemId);
+
+      closeNote();
+      renderMenu();
+      renderTicket();
+      toast("Saved note", line.note ? "Added to kitchen ticket." : "Note cleared.");
+    });
+
+    // ---------- Payload + sending ----------
+    function buildKitchenPayload(){
+      const { subtotal, tax, service, total } = computeTotals();
+      const createdAtISO = state.createdAt.toISOString();
+
+      const items = Array.from(state.cart.values())
+        .filter(l => l.qty > 0)
+        .map(l => ({
+          id: l.id,
+          name: l.name,
+          qty: l.qty,
+          unitPrice: l.price,
+          lineTotal: +(l.price * l.qty).toFixed(2),
+          category: l.category,
+          tags: l.tags,
+          note: l.note || null
+        }));
+
+      return {
+        orderId: state.orderId ?? `T${String(state.table).trim()}-${uid()}`,
+        status: "NEW",
+        createdAt: createdAtISO,
+        table: String(state.table).trim(),
+        guests: Number(state.guests || 0) || null,
+        servicePct: state.servicePct,
+        taxRate: state.taxRate,
+        totals: {
+          subtotal: +subtotal.toFixed(2),
+          tax: +tax.toFixed(2),
+          service: +service.toFixed(2),
+          total: +total.toFixed(2)
+        },
+        items
+      };
+    }
+
+    function openPayload(){
+      const payload = buildKitchenPayload();
+      $("#payloadPre").textContent = JSON.stringify(payload, null, 2);
+      $("#payloadDialog").showModal();
+    }
+
+    function closePayload(){
+      if ($("#payloadDialog").open) $("#payloadDialog").close();
+    }
+
+    $("#viewPayloadBtn").addEventListener("click", openPayload);
+    $("#closePayload").addEventListener("click", closePayload);
+    $("#closePayload2").addEventListener("click", closePayload);
+
+    $("#copyPayload").addEventListener("click", async () => {
+      try{
+        await navigator.clipboard.writeText($("#payloadPre").textContent);
+        toast("Copied", "Kitchen payload copied to clipboard.");
+      } catch {
+        toast("Copy failed", "Your browser blocked clipboard access.");
+      }
+    });
+
+    async function sendToKitchen(){
+      if (cartCount() === 0) return;
+
+      if (!state.orderId){
+        state.orderId = `T${String(state.table).trim()}-${uid()}`;
+      }
+
+      const payload = buildKitchenPayload();
+      $("#payloadPre").textContent = JSON.stringify(payload, null, 2);
+
+
+      $("#connDot").style.background = "var(--gold)";
+      $("#connText").innerHTML = `Kitchen link: <strong>Sending…</strong>`;
+
+      console.log("POST /kitchen/orders");
+      console.log(payload);
+
+      await new Promise(r => setTimeout(r, 650));
+
+      $("#connDot").style.background = "var(--accent2)";
+      $("#connText").innerHTML = `Kitchen link: <strong>Sent</strong>`;
+      toast("Sent to kitchen", `Order #${payload.orderId} submitted.`);
+
+
+      renderTicket();
+    }
+
+    $("#submitBtn").addEventListener("click", sendToKitchen);
+
+    // Keyboard shortcut: Ctrl + Enter
+    window.addEventListener("keydown", (e) => {
+      const isCtrlEnter = (e.ctrlKey || e.metaKey) && e.key === "Enter";
+      if (isCtrlEnter){
+        e.preventDefault();
+        if (!$("#submitBtn").disabled) sendToKitchen();
+      }
+    });
+
+    // ---------- Event delegation for menu controls ----------
+    $("#menuRoot").addEventListener("click", (e) => {
+      const itemEl = e.target.closest(".item");
+      if (!itemEl) return;
+      const id = itemEl.dataset.itemId;
+
+      if (e.target.closest(".inc")){
+        const cur = state.cart.get(id)?.qty ?? 0;
+        setQty(id, cur + 1);
+      }
+      if (e.target.closest(".dec")){
+        const cur = state.cart.get(id)?.qty ?? 0;
+        setQty(id, cur - 1);
+      }
+      if (e.target.closest(".noteBtn")){
+        openNote(id);
+      }
+    });
+
+    // ---------- Filters ----------
+    $$(".chip").forEach(btn => {
+      btn.addEventListener("click", () => {
+        $$(".chip").forEach(b => b.setAttribute("aria-pressed", "false"));
+        btn.setAttribute("aria-pressed", "true");
+        state.filter = btn.dataset.filter;
+        renderMenu();
+      });
+    });
+
+    // ---------- Service % / order details inputs ----------
+    $("#servicePct").addEventListener("input", () => {
+      const raw = ($("#servicePct").value || "").replace(/[^\d.]/g,"");
+      const n = Number(raw);
+      state.servicePct = Number.isFinite(n) ? clampNum(n, 0, 30) : 0;
+      renderTicket();
+    });
+
+    $("#tableInput").addEventListener("input", () => {
+      state.table = $("#tableInput").value;
+      renderTicket();
+    });
+    $("#guestInput").addEventListener("input", () => {
+      state.guests = $("#guestInput").value;
+    });
+
+    // ---------- Print ----------
+    $("#printBtn").addEventListener("click", () => {
+    
+      window.print();
+    });
+
+    // ---------- Clear ----------
+    $("#clearBtn").addEventListener("click", () => {
+      state.cart.clear();
+      state.orderId = null;
+      state.createdAt = new Date();
+      renderMenu();
+      renderTicket();
+      toast("Cleared", "Ticket reset.");
+    });
+
+    // ---------- Toast ----------
+    function toast(title, message){
+      const wrap = $("#toastWrap");
+      const el = document.createElement("div");
+      el.className = "toast";
+      el.innerHTML = `
+        <div>
+          <div class="title">${escapeHtml(title)}</div>
+          <div class="msg">${escapeHtml(message)}</div>
+        </div>
+        <button class="dismiss" type="button" aria-label="Dismiss toast">OK</button>
+      `;
+      wrap.appendChild(el);
+      const kill = () => {
+        el.style.opacity = "0";
+        el.style.transform = "translateY(8px)";
+        setTimeout(() => el.remove(), 180);
+      };
+      el.querySelector(".dismiss").addEventListener("click", kill);
+      setTimeout(kill, 3600);
+    }
+
+    // ---------- IntersectionObserver reveal (scroll-triggered) ----------
+    const io = new IntersectionObserver((entries) => {
+      for (const en of entries){
+        if (en.isIntersecting){
+          en.target.style.animationPlayState = "running";
+          io.unobserve(en.target);
+        }
+      }
+    }, { threshold: 0.12 });
+
+    $$(".reveal").forEach((el) => {
+      el.style.animationPlayState = "paused";
+      io.observe(el);
+    });
+
+    // ---------- Init ----------
+    $("#nowStamp").textContent = nowStamp();
+    $("#ticketStamp").textContent = `Updated • ${nowStamp()}`;
+
+    renderMenu();
+    renderTicket();
+  </script>
+</body>
+</html>
+
+
+
+
+
